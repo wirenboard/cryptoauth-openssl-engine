@@ -73,6 +73,7 @@ int eccx08_get_iface_cfg(ATCAIfaceCfg* iface, eccx08_engine_key_t * key)
         {
             /* Copy the default settings */
             memcpy(iface, def, sizeof(ATCAIfaceCfg));
+            iface->devtype = ATECC608A;
 
             /* Replace defaults with the key settings */
             switch (iface->iface_type)
