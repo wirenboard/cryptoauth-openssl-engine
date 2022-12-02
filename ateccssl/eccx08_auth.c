@@ -115,11 +115,10 @@ int eccx08_cbdata_to_password(void *callback_data, eccx08_engine_key_password_t 
 
     const char *cb_pass = *((const char **) callback_data);
 
-    if (cb_pass == NULL) {
+    if ((cb_pass == NULL) || (sscanf(cb_pass, "%02hu:%s", &password->auth_slot, password->password) != 2)) {
         return 0;
     } else {
         DEBUG_ENGINE("Raw password: %s\n", cb_pass);
-        sscanf(cb_pass, "%02hu:%s", &password->auth_slot, password->password);
         return 1;
     }
 }
