@@ -1,3 +1,9 @@
+libateccssl (0.2.4) stable; urgency=medium
+
+  * fix treating complex OpenVPN context as slot-passwd pair (thx @dudanov!)
+
+ -- Nikita Maslov <nikita.maslov@wirenboard.ru>  Fri, 02 Dec 2022 11:09:07 +0600
+
 libateccssl (0.2.3) stable; urgency=medium
 
   * cryptoauthlib: handle 'Watchdog About to Expire' state properly
