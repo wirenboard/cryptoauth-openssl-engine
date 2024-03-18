@@ -1,3 +1,9 @@
+libateccssl (0.2.6) stable; urgency=medium
+
+  * Trigger ATECC watchdog where possible to possibly reduce I2C errors
+
+ -- Nikita Maslov <nikita.maslov@wirenboard.com>  Mon, 18 Mar 2024 18:24:01 +0500
+
 libateccssl (0.2.5) stable; urgency=medium
 
   * Add arm64 build, no functional changes
