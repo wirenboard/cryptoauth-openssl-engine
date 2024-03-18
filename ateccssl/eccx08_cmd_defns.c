@@ -146,8 +146,8 @@ static int get_cert(char *filename, atcacert_def_t * pCertDef, atcacert_def_t * 
         if(ATCA_SUCCESS == status)
         {
             /* Extract/Reconstruct the certificate */
-            status = atcacert_read_cert(pCertDef, 
-                                        g_signer_1_ca_public_key, 
+            status = atcacert_read_cert(pCertDef,
+                                        g_signer_1_ca_public_key,
                                         pCertRaw, &certRawSize);
         }
 
@@ -170,13 +170,13 @@ static int get_cert(char *filename, atcacert_def_t * pCertDef, atcacert_def_t * 
             status = ATCA_GEN_FAIL;
             break;
         }
-        
+
         if(certRawSize != fwrite(pCertRaw, 1, certRawSize, fd))
         {
             DEBUG_ENGINE("Failed to write: %s\n", filename);
             status = ATCA_GEN_FAIL;
         }
-        
+
     } while(0);
 
     if(pCertRaw)
@@ -278,10 +278,10 @@ static int get_key(ENGINE* e, uint16_t keyid, char * filename)
     ATCA_STATUS status = ATCA_GEN_FAIL;
     char key_str[32];
     EVP_PKEY* pkey;
-    
+
     DEBUG_ENGINE("Entered\n");
 
-    snprintf(key_str, 32, "ATECCx08:%02x:%02x:%02x:%02x", pCfg->iface_type, 
+    snprintf(key_str, 32, "ATECCx08:%02x:%02x:%02x:%02x", pCfg->iface_type,
         pCfg->atcai2c.bus, pCfg->atcai2c.slave_address, keyid);
     key_str[31] = '\0';
 

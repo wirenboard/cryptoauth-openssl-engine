@@ -126,7 +126,7 @@ static EVP_MD eccx08_sha256_method = {
     NID_sha256,                         /**< Type/Algorithm */
     NID_ecdsa_with_SHA256,              /**< Private Key type - N/A for sha256 */
     SHA256_DIGEST_LENGTH,               /**< Digest size - SHA256 is always 32 */
-    EVP_MD_FLAG_PKEY_METHOD_SIGNATURE,  
+    EVP_MD_FLAG_PKEY_METHOD_SIGNATURE,
     eccx08_sha256_init,
     eccx08_sha256_update,
     eccx08_sha256_final,
@@ -149,7 +149,7 @@ int eccx08_sha256_selector(ENGINE *e, const EVP_MD **digest, const int **nids, i
         *nids = eccx08_digest_ids;
         return 2;
     }
-    
+
     if (nid == NID_sha256)
     {
         *digest = &eccx08_sha256_method;
