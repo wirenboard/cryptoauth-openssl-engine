@@ -256,8 +256,6 @@ int eccx08_cert_load_client(ENGINE *e,
         *ppCert = NULL;
     }
 
-    ATCAB_IDLE_TO_RESET_WATCHDOG();
-
     do
     {
         uint8_t *       pCertTmp;
@@ -276,6 +274,8 @@ int eccx08_cert_load_client(ENGINE *e,
             DEBUG_ENGINE("Init Failure: %#x\n", status);
             break;
         }
+
+        ATCAB_IDLE_TO_RESET_WATCHDOG(__func__);
 
 //        /* Extract/Reconstruct the signer certificate */
 //        status = atcacert_read_cert(g_cert_def_1_signer_ptr, g_signer_1_ca_public_key, pCertRaw, &certRawSize);

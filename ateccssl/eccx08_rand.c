@@ -134,7 +134,7 @@ static int RAND_eccx08_rand_bytes(unsigned char *buf, int num)
 
     do
     {
-        ATCAB_IDLE_TO_RESET_WATCHDOG();
+        ATCAB_IDLE_TO_RESET_WATCHDOG(__func__);
 
         if (ATCA_BLOCK_SIZE <= num)
         {
