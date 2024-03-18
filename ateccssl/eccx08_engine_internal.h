@@ -46,7 +46,8 @@
 // it adds delay between ATECC init sequence in main() and this operation.
 //
 // Taken from atecc-util.
-#define ATCAB_IDLE_TO_RESET_WATCHDOG(prefix) do { \
+#define ATCAB_IDLE_TO_RESET_WATCHDOG(x) ATCAB_IDLE_TO_RESET_WATCHDOG_R(x)
+#define ATCAB_IDLE_TO_RESET_WATCHDOG_R(prefix) do { \
     ATCA_STATUS __wd_reset_status = atcab_idle(); \
     if (__wd_reset_status != ATCA_SUCCESS) { \
         fprintf(stderr, prefix ": Command atcab_idle is failed with status 0x%x, maybe device is idle already\n", __wd_reset_status); \
