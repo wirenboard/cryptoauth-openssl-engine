@@ -48,6 +48,8 @@ static int eccx08_digest_ids[] = { NID_sha256 };
  */
 static int eccx08_sha256_update(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
+    ATCAB_IDLE_TO_RESET_WATCHDOG();
+
     ATCA_STATUS status = atcab_hw_sha2_256_update(ctx->md_data, data, count);
 
     DEBUG_ENGINE("%s(%#x)\n", status ? "Failed" : "Succeeded", status);

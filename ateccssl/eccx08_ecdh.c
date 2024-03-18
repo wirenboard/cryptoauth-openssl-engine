@@ -150,6 +150,8 @@ static int eccx08_ecdh_compute_key(void *out, size_t outlen,
             goto err;
         }
 
+        ATCAB_IDLE_TO_RESET_WATCHDOG();
+
         status = atcab_ecdh_enc(0, &raw_key[1], shared_secret, g_eccx08_transport_key, 4);
 
         atcab_release_safe();

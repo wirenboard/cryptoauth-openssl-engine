@@ -114,6 +114,8 @@ static int get_cert(char *filename, atcacert_def_t * pCertDef, atcacert_def_t * 
         return ATCA_BAD_PARAM;
     }
 
+    ATCAB_IDLE_TO_RESET_WATCHDOG();
+
     do
     {
         /* Allocate a temporary buffer to load the reconstructed certificate */

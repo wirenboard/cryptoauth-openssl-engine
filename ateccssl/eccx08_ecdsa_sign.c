@@ -130,6 +130,8 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
             }
         }
 
+        ATCAB_IDLE_TO_RESET_WATCHDOG();
+
         /* Do the actual signature using the configured slot */
         status = atcab_sign(slot_num, dgst, raw_sig);
 

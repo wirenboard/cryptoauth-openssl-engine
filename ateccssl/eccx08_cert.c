@@ -256,6 +256,8 @@ int eccx08_cert_load_client(ENGINE *e,
         *ppCert = NULL;
     }
 
+    ATCAB_IDLE_TO_RESET_WATCHDOG();
+
     do
     {
         uint8_t *       pCertTmp;

@@ -130,6 +130,8 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
 
     memcpy(ifacecfg, cfg, sizeof (ATCAIfaceCfg));
 
+    ATCAB_IDLE_TO_RESET_WATCHDOG();
+
     return atcab_init(ifacecfg);
 }
 

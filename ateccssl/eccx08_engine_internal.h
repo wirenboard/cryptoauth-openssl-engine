@@ -40,6 +40,19 @@
 
 #include "atcacert/atcacert_def.h"
 
+// This sends ATECC to idle mode, so watchdog won't be triggered
+// in the middle of command execution.
+// This may happen because of I/O in fread slow enough
+// it adds delay between ATECC init sequence in main() and this operation.
+//
+// Taken from atecc-util.
+#define ATCAB_IDLE_TO_RESET_WATCHDOG() do { \
+    ATCA_STATUS __wd_reset_status = atcab_idle(); \
+    if (__wd_reset_status != ATCA_SUCCESS) { \
+        eprintf("Command atcab_idle is failed with status 0x%x, maybe device is idle already\n", status); \
+    } \
+} while (0)
+
 /** \brief Define if we're using the 1.0 or 1.1 APIs */
 #if OPENSSL_VERSION_NUMBER > 0x10002000 && OPENSSL_VERSION_NUMBER < 0x10003000
 #define ATCA_OPENSSL_OLD_API                    (1)

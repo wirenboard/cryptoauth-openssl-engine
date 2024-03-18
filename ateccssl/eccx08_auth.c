@@ -41,6 +41,8 @@ static ATCA_STATUS do_atecc_auth(const char *passwd, uint8_t slot_id)
     uint8_t resp[32];
     ATCA_STATUS status;
 
+    ATCAB_IDLE_TO_RESET_WATCHDOG();
+
     do {
         status = atcab_read_serial_number(sn);
         if (status != ATCA_SUCCESS) {
