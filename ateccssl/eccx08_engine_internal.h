@@ -49,7 +49,7 @@
 #define ATCAB_IDLE_TO_RESET_WATCHDOG() do { \
     ATCA_STATUS __wd_reset_status = atcab_idle(); \
     if (__wd_reset_status != ATCA_SUCCESS) { \
-        fprintf(stderr, "Command atcab_idle is failed with status 0x%x, maybe device is idle already\n", status); \
+        fprintf(stderr, "Command atcab_idle is failed with status 0x%x, maybe device is idle already\n", __wd_reset_status); \
     } \
 } while (0)
 
