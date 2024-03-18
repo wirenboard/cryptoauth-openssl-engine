@@ -747,7 +747,7 @@ static int eccx08_pkey_ec_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
             break;
         }
 
-        ATCAB_IDLE_TO_RESET_WATCHDOG(__func__ " before genkey");
+        ATCAB_IDLE_TO_RESET_WATCHDOG("eccx08_pkey_ec_keygen before genkey");
 
         /* Openssl raw key has a leading byte with conversion form id */
         raw_pubkey[0] = POINT_CONVERSION_UNCOMPRESSED;
@@ -757,7 +757,7 @@ static int eccx08_pkey_ec_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
             &raw_pubkey[1]);
 
         if (status != ATCA_SUCCESS) {
-            ATCAB_IDLE_TO_RESET_WATCHDOG(__func__ " before get_pubkey");
+            ATCAB_IDLE_TO_RESET_WATCHDOG("eccx08_pkey_ec_keygen before get_pubkey");
 
             //Get public key without private key generation
             status = atcab_get_pubkey(eccx08_engine_config.device_key_slot,
