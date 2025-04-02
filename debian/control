@@ -1,12 +1,15 @@
 Source: libateccssl
-Maintainer: Nikita Maslov <n.maslov@contactless.ru>
+Maintainer: Wiren Board team <info@wirenboard.com>
 Section: misc
 Priority: optional
 Standards-Version: 3.9.2
 Build-Depends: debhelper (>= 9), libssl-dev (>= 1.1.0)
+Homepage: https://github.com/wirenboard/cryptoauth-openssl-engine
 
 Package: libateccssl1.1
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Multi-Arch: same
 Description: ATECC508A/608A engine for OpenSSL 1.1.x
+ OpenSSL Engine implementation using ATECC508 for ECC key storage,
+ ECDSA sign/verify, ECDH, and FIPS Random Number Generator (RNG).
