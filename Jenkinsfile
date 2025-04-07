@@ -1,3 +1,3 @@
-buildDebSbuild defaultTargets: 'bullseye-armhf bullseye-arm64 bullseye-host',
+buildDebSbuild defaultTargets: 'trixie-armhf trixie-arm64 trixie-host',
                defaultRunLintian: true,
                repos: ['release', 'devTools']

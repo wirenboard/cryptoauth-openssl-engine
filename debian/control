@@ -2,8 +2,8 @@ Source: libateccssl
 Maintainer: Wiren Board team <info@wirenboard.com>
 Section: misc
 Priority: optional
-Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9), libssl-dev (>= 1.1.0)
+Standards-Version: 4.5.1
+Build-Depends: debhelper-compat (= 13), libssl-dev (>= 1.1.0)
 Homepage: https://github.com/wirenboard/cryptoauth-openssl-engine
 
 Package: libateccssl1.1
