@@ -61,6 +61,10 @@ struct {
     int state;
 } global_lock = { NULL, 0 };
 
+/* Set when the mutex was recovered from a dead owner (EOWNERDEAD): the chip
+   was abandoned mid-session and must be resynchronized before use. */
+static int global_lock_recovered = 0;
+
 /** \brief Lock the global mutex */
 ATCA_STATUS eccx08_global_lock(void)
 {
@@ -80,8 +84,14 @@ ATCA_STATUS eccx08_global_lock(void)
         status = hal_os_lock_mutex(global_lock.handle);
         if (ATCA_FUNC_FAIL == status)
         {
-            /* Mutex was obtained but we're in an unknown state */
-            atca_delay_ms(1500);
+            /* EOWNERDEAD: the mutex WAS obtained, but its previous owner
+               died mid-session, so the chip state is unknown and possibly
+               latched. The former blind 1.5 s delay assumed the chip
+               watchdog would park it, but the watchdog does not run while
+               the chip is idle-parked. Flag it instead;
+               atcab_init_safe() resynchronizes the chip once the device
+               interface is up. */
+            global_lock_recovered = 1;
             status = ATCA_SUCCESS;
         }
 
@@ -117,20 +127,44 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
         return status;
     }
 
+    /* NB: every error path below must release the mutex - a lock left
+       held until process exit gives the next client a spurious
+       EOWNERDEAD plus a chip in an unknown state. */
     if (ifacecfg != NULL)
     {
+        (void)eccx08_global_unlock();
         return ATCA_FUNC_FAIL;
     }
 
     ifacecfg = (ATCAIfaceCfg *) malloc(sizeof (ATCAIfaceCfg));
     if (!ifacecfg)
     {
+        (void)eccx08_global_unlock();
         return ATCA_FUNC_FAIL;
     }
 
     memcpy(ifacecfg, cfg, sizeof (ATCAIfaceCfg));
 
-    return atcab_init(ifacecfg);
+    status = atcab_init(ifacecfg);
+    if (ATCA_SUCCESS != status)
+    {
+        free(ifacecfg);
+        ifacecfg = NULL;
+        (void)eccx08_global_unlock();
+        return status;
+    }
+
+    if (global_lock_recovered)
+    {
+        /* The previous lock owner died mid-session: park the chip through
+           a best-effort wake+sleep so this session starts from a known
+           state instead of riding an abandoned (possibly latched) one. */
+        (void)atcab_wakeup();
+        (void)atcab_sleep();
+        global_lock_recovered = 0;
+    }
+
+    return ATCA_SUCCESS;
 }
 
 /** \brief Thin abstraction on atcab_release that incorporates a global locking mechanism*/
@@ -145,6 +179,7 @@ ATCA_STATUS atcab_release_safe(void)
 
     if (ifacecfg == NULL)
     {
+        (void)eccx08_global_unlock();
         return ATCA_FUNC_FAIL;
     }
 
