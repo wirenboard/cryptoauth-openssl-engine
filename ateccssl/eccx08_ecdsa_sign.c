@@ -104,6 +104,7 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
     if (eccx08_eckey_isx08key(eckey, &passwd_id) != ENGINE_OPENSSL_SUCCESS)
     {
         DEBUG_ENGINE("bad ATECC ECDSA key object\n");
+        ECDSA_SIG_free(sig);
         return NULL;
     }
 
