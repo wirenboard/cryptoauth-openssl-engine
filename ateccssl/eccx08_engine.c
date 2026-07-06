@@ -41,7 +41,15 @@
 /* Constants used when creating the ENGINE */
 static const char * const engine_eccx08_id = ECCX08_ENGINE_ID;
 static const char * const engine_eccx08_name = ECCX08_ENGINE_NAME;
-static const char * const engine_eccx08_mutex_name = ECCX08_ENGINE_ID "_" ECCX08_ENGINE_VERSION;
+/* Name of the shared-memory mutex region that serializes chip access
+ * across every process on the system: engine loaders (openssl, curl,
+ * nginx) and the direct cryptoauthlib users (wb tools and services).
+ * The name is a frozen protocol constant shared by all of them: every
+ * binary must use this exact value to meet the others on the same
+ * region. Do NOT derive it from ECCX08_ENGINE_VERSION: bumping
+ * the version would silently split chip users into two populations
+ * that no longer exclude each other. */
+static const char * const engine_eccx08_mutex_name = "ateccx08_01.00.10";
 
 static ATCAIfaceCfg *ifacecfg = NULL;
 
