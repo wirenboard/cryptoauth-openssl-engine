@@ -243,8 +243,14 @@ static EVP_PKEY* eccx08_eckey_new_key(ENGINE *e, const char* key_id, uint8_t pas
         if (!EC_KEY_set_private_key(eckey, bn))
         {
             BN_free(bn);
+            bn = NULL;
             break;
         }
+
+        /* EC_KEY_set_private_key() stores a duplicate of the BIGNUM, so our
+           copy must always be released. */
+        BN_free(bn);
+        bn = NULL;
 
         /* Set method information */
 #if ATCA_OPENSSL_OLD_API
@@ -577,13 +583,17 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
     }
 #endif
 
+    if (eckey)
+    {
+        /* Balance EVP_PKEY_get1_EC_KEY(): the pkey holds its own reference,
+           ours was only needed for the duration of this function. It used
+           to be released on the error path only, leaking one EC_KEY
+           reference per signing context on success. */
+        EC_KEY_free(eckey);
+    }
+
     if (ATCA_SUCCESS != status)
     {
-        if (eckey)
-        {
-            EC_KEY_free(eckey);
-        }
-
         /* Only drop the reference if we created the pkey ourselves.
            eccx08_pkey_ec_init() passes a BORROWED reference obtained with
            EVP_PKEY_CTX_get0_pkey(); freeing it here made OpenSSL's own
