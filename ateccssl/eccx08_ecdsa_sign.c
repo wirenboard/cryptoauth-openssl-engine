@@ -133,22 +133,39 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
         /* Do the actual signature using the configured slot */
         status = atcab_sign(slot_num, dgst, raw_sig);
 
-        /* Make sure we release the device before checking if the sign succeeded */
-        if (ATCA_SUCCESS != atcab_release_safe())
-        {
-            break;
-        }
+        /* Release the device, but remember its status separately. The
+         * signature has already been physically produced into raw_sig by
+         * the chip: if release fails, THIS sign is still valid - only the
+         * NEXT session may be in trouble. Returning a non-NULL ECDSA_SIG
+         * with NULL r,s here would make i2d_ECDSA_SIG() in the caller
+         * dereference NULL. */
+        ATCA_STATUS rel_status = atcab_release_safe();
 
-        /* Now check if the sign succeeded */
+        /* Check sign result FIRST (before considering release). */
         if (ATCA_SUCCESS != status)
         {
             DEBUG_ENGINE("Sign Failure: %#x\n", status);
             break;
         }
 
+        if (ATCA_SUCCESS != rel_status)
+        {
+            /* Sign succeeded, release failed - log and continue: we still
+             * have a valid signature in raw_sig. Breaking out here would
+             * leave the SIG with NULL r,s. */
+            DEBUG_ENGINE("Release Failure (sign OK): %#x\n", rel_status);
+        }
+
         BIGNUM *r, *s;
         r = BN_bin2bn(raw_sig, ATCA_BLOCK_SIZE, NULL);
         s = BN_bin2bn(&raw_sig[ATCA_BLOCK_SIZE], ATCA_BLOCK_SIZE, NULL);
+        if (!r || !s) {
+            DEBUG_ENGINE("BN_bin2bn failed\n");
+            if (r) BN_free(r);
+            if (s) BN_free(s);
+            status = ATCA_FUNC_FAIL;
+            break;
+        }
 #if ATCA_OPENSSL_OLD_API
         sig->r = r;
         sig->s = s;
@@ -156,6 +173,8 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
         if (!ECDSA_SIG_set0(sig, r, s))
         {
             DEBUG_ENGINE("Failed to set ECDSA signature values\n");
+            BN_free(r);
+            BN_free(s);
             status = ATCA_FUNC_FAIL;
             break;
         }
@@ -166,7 +185,8 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
 
     if (ATCA_SUCCESS != status)
     {
-        OPENSSL_free(sig);
+        /* ECDSA_SIG_free also releases the r,s BIGNUMs owned by the SIG. */
+        ECDSA_SIG_free(sig);
         sig = NULL;
     }
 
