@@ -502,6 +502,7 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
     {
         uint8_t raw_pubkey[ATCA_BLOCK_SIZE * 2 + 1];
         uint8_t slot_num = 255;
+        ATCA_STATUS rel_status;
 
         eckey = EVP_PKEY_get1_EC_KEY(pkey);
 
@@ -537,21 +538,25 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
 
         /* Get public key without private key generation */
         status = atcab_get_pubkey(slot_num, &raw_pubkey[1]);
-        if (status != ATCA_SUCCESS) {
-            DEBUG_ENGINE("Result 0x%x\n", status);
-        }
 
-        /* Release the device before testing status */
-        if (ATCA_SUCCESS != atcab_release_safe()) {
-            DEBUG_ENGINE("Result 0x%x\n", status);
-            break;
-        }
+        rel_status = atcab_release_safe();
 
-        /* Check atcab_get_pubkey result */
+        /* Check the atcab_get_pubkey result FIRST (before considering
+           release): breaking out on a release failure while status was
+           still SUCCESS skipped eccx08_eckey_convert() and returned a
+           non-NULL pkey whose EC_KEY has no public key set - the same
+           half-built-object pattern as the sign-path SIGSEGV. */
         if (ATCA_SUCCESS != status)
         {
             DEBUG_ENGINE("Result 0x%x\n", status);
             break;
+        }
+
+        if (ATCA_SUCCESS != rel_status)
+        {
+            /* The pubkey was read successfully; a release failure does not
+               invalidate it. Log and continue with the conversion. */
+            DEBUG_ENGINE("Release failure (pubkey read OK): %#x\n", rel_status);
         }
 
         /* Convert the raw public key into OpenSSL type */
