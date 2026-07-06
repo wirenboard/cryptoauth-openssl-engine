@@ -148,6 +148,27 @@ ATCA_STATUS atcab_release_safe(void)
         return ATCA_FUNC_FAIL;
     }
 
+    /* Park the chip with SLEEP at the end of every session.
+     *
+     * Every command ends with _atcab_exit() -> atcab_idle(); idle both
+     * suspends the chip watchdog and preserves any latched fault state
+     * (health-test 0x08 latch or "corrupted idle") indefinitely.  A real
+     * Sleep wipes those states, so ending every engine session with Sleep
+     * both prevents latches from persisting and cures a chip corrupted by
+     * a concurrent unlocked client.
+     *
+     * The wake is NOT optional: an idle-parked chip ignores all SCL
+     * activity and accepts flags only while awake (DS 7.1.1/7.2), so a
+     * bare sleep flag would never reach it - it must be woken first.
+     *
+     * Both calls are still best-effort by design: in the "corrupted idle"
+     * state the wake response read fails, but the subsequent sleep flag
+     * write is anomalously ACKed by the chip and cures it; on an
+     * already-awake chip the extra wake is harmless.  TempKey loss from
+     * Sleep is irrelevant here: the session is over. */
+    (void)atcab_wakeup();
+    (void)atcab_sleep();
+
     status = atcab_release();
 
     free(ifacecfg);
