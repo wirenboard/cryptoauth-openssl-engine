@@ -41,7 +41,14 @@
 /* Constants used when creating the ENGINE */
 static const char * const engine_eccx08_id = ECCX08_ENGINE_ID;
 static const char * const engine_eccx08_name = ECCX08_ENGINE_NAME;
-static const char * const engine_eccx08_mutex_name = ECCX08_ENGINE_ID "_" ECCX08_ENGINE_VERSION;
+/* Name of the shared-memory mutex region that serializes chip access
+ * across every process on the system: engine loaders (openssl, curl,
+ * nginx) and the direct cryptoauthlib users (wb tools and services).
+ * The canonical value lives in cryptoauthlib's atca_hal.h as
+ * ATCA_HAL_SHARED_MUTEX_NAME so the whole stack shares one definition;
+ * it is a frozen protocol constant - every binary must use this exact
+ * value to meet the others on the same region. */
+static const char * const engine_eccx08_mutex_name = ATCA_HAL_SHARED_MUTEX_NAME;
 
 static ATCAIfaceCfg *ifacecfg = NULL;
 
