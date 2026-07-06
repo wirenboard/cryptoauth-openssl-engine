@@ -484,6 +484,7 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
 {
     ATCA_STATUS     status = ATCA_GEN_FAIL;
     EC_KEY *        eckey = NULL;
+    int             pkey_is_ours = 0;
 
     DEBUG_ENGINE("Entered\n");
     if (!pkey)
@@ -494,6 +495,7 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
             DEBUG_ENGINE("Failed\n");
             return NULL;
         }
+        pkey_is_ours = 1;
     }
 
     do
@@ -577,11 +579,16 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
             EC_KEY_free(eckey);
         }
 
-        if (pkey)
+        /* Only drop the reference if we created the pkey ourselves.
+           eccx08_pkey_ec_init() passes a BORROWED reference obtained with
+           EVP_PKEY_CTX_get0_pkey(); freeing it here made OpenSSL's own
+           cleanup decrement the refcount a second time -> UAF/double-free
+           (crashes the calling process). */
+        if (pkey_is_ours && pkey)
         {
             EVP_PKEY_free(pkey);
-            pkey = NULL;
         }
+        pkey = NULL;
     }
 
     return (pkey);
