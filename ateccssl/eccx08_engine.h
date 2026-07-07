@@ -146,6 +146,13 @@ char * eccx08_strip_path(char * in_str);
 #define DEBUG_ENGINE(...)  /* asm ("nop")*/
 #endif
 
+/* Diagnostic tracing of exceptional events (health-test cure, dead-owner
+   lock recovery, terminal session failures). Always compiled in, silent
+   unless the process environment has ATECC_DIAG=1 - see atca_diag.h. One
+   event per line on stderr: "ateccx08: DIAG event=<name> [k=v ...]". */
+#include "atca_diag.h"
+#define DIAG_ENGINE(f, ...)    ATCA_DIAG_LINE("ateccx08", f, ##__VA_ARGS__)
+
 /* Concurency Support - Native to OpenSSL engine today but may move to
 cryptoauthlib at a later date so named accordingly */
 ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg);
