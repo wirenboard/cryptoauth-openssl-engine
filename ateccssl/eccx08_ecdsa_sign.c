@@ -134,6 +134,18 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
         /* Do the actual signature using the configured slot */
         status = atcab_sign(slot_num, dgst, raw_sig);
 
+        if (ATCA_HEALTH_TEST_ERROR == status)
+        {
+            /* Latched RNG health-test failure (0x08): with ChipOptions
+               bit3 = 0 it never clears on its own, but a real Sleep wipes
+               it. Cure the chip and retry the whole sign once -
+               atcab_sign() redoes its Random/Nonce/Sign sequence, so no
+               TempKey state is lost by the sleep. */
+            (void)atcab_wakeup();
+            (void)atcab_sleep();
+            status = atcab_sign(slot_num, dgst, raw_sig);
+        }
+
         /* Release the device, but remember its status separately. The
          * signature has already been physically produced into raw_sig by
          * the chip: if release fails, THIS sign is still valid - only the
