@@ -153,6 +153,13 @@ char * eccx08_strip_path(char * in_str);
 #include "atca_diag.h"
 #define DIAG_ENGINE(f, ...)    ATCA_DIAG_LINE("ateccx08", f, ##__VA_ARGS__)
 
+/* Human-readable errors in the standard OpenSSL error queue (eccx08_err.c).
+   Always on, independent of ATECC_DIAG: the exact ATCA cause of a failed
+   session reaches the caller through ERR_print_errors and client logs. */
+void eccx08_err_load_strings(void);
+void eccx08_raise_session_error(const char *op, int atca_status);
+const char *eccx08_atca_status_name(int status);
+
 /* Concurency Support - Native to OpenSSL engine today but may move to
 cryptoauthlib at a later date so named accordingly */
 ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg);

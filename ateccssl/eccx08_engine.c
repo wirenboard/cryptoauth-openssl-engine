@@ -133,6 +133,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
     if (ATCA_SUCCESS != status)
     {
         DIAG_ENGINE("event=session_fail op=lock status=0x%02x", status);
+        eccx08_raise_session_error("lock", status);
         return status;
     }
 
@@ -160,6 +161,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
     if (ATCA_SUCCESS != status)
     {
         DIAG_ENGINE("event=session_fail op=init status=0x%02x", status);
+        eccx08_raise_session_error("init", status);
         free(ifacecfg);
         ifacecfg = NULL;
         (void)eccx08_global_unlock();
@@ -330,6 +332,8 @@ static int eccx08_init(ENGINE *e)
        process is enabled and reaches stderr, so an absence of later DIAG
        events means "nothing happened" rather than "diagnostics off". */
     DIAG_ENGINE("event=engine_ready");
+
+    eccx08_err_load_strings();
 
     if (!global_lock.handle)
     {
