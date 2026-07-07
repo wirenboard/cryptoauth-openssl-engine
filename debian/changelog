@@ -1,3 +1,24 @@
+libateccssl (0.4.0) stable; urgency=medium
+
+  * ateccssl: park the chip with Sleep instead of Idle at session end;
+    latched chip states (RNG health-test 0x08, corrupted idle) no
+    longer survive between sessions
+  * ateccssl: serialize all chip users with a robust shared-memory
+    mutex (frozen name sourced from cryptoauthlib, publish-after-init
+    creation)
+  * ateccssl: cure and retry once on a latched RNG health test instead
+    of failing the session
+  * ateccssl: fix segfault from a half-built ECDSA_SIG on release
+    failure
+  * ateccssl: fix memory leaks and a borrowed-EVP_PKEY free on the key
+    and sign paths
+  * ateccssl: add runtime-toggleable diagnostics (ATECC_DIAG=1) and
+    human-readable errors in the OpenSSL error queue
+  * cryptoauthlib: robust wake sequence (retries with backoff, cure of
+    an abandoned-awake chip, drain of stale response frames)
+
+ -- Petr Krasnoshchekov <petr.krasnoshchekov@wirenboard.com>  Wed, 08 Jul 2026 09:39:42 +0000
+
 libateccssl (0.3.0) stable; urgency=medium
 
   * Port for Debian 13
