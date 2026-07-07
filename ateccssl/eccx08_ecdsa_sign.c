@@ -161,6 +161,7 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
         {
             DEBUG_ENGINE("Sign Failure: %#x\n", status);
             DIAG_ENGINE("event=session_fail op=sign status=0x%02x", status);
+            eccx08_raise_session_error("sign", status);
             break;
         }
 

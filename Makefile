@@ -79,6 +79,7 @@ LIBATECCSSL_SOURCES :=  eccx08_cmd_defns.c \
 						eccx08_ecdsa_sign.c \
 						eccx08_eckey_meth.c \
 						eccx08_engine.c \
+						eccx08_err.c \
 						eccx08_platform.c \
 						eccx08_auth.c
 
