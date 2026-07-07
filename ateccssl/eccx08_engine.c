@@ -131,6 +131,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
 
     if (ATCA_SUCCESS != status)
     {
+        DIAG_ENGINE("event=session_fail op=lock status=0x%02x", status);
         return status;
     }
 
@@ -139,6 +140,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
        EOWNERDEAD plus a chip in an unknown state. */
     if (ifacecfg != NULL)
     {
+        DIAG_ENGINE("event=session_fail op=init status=0x%02x", ATCA_FUNC_FAIL);
         (void)eccx08_global_unlock();
         return ATCA_FUNC_FAIL;
     }
@@ -146,6 +148,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
     ifacecfg = (ATCAIfaceCfg *) malloc(sizeof (ATCAIfaceCfg));
     if (!ifacecfg)
     {
+        DIAG_ENGINE("event=session_fail op=init status=0x%02x", ATCA_FUNC_FAIL);
         (void)eccx08_global_unlock();
         return ATCA_FUNC_FAIL;
     }
@@ -155,6 +158,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
     status = atcab_init(ifacecfg);
     if (ATCA_SUCCESS != status)
     {
+        DIAG_ENGINE("event=session_fail op=init status=0x%02x", status);
         free(ifacecfg);
         ifacecfg = NULL;
         (void)eccx08_global_unlock();
@@ -166,6 +170,7 @@ ATCA_STATUS atcab_init_safe(ATCAIfaceCfg *cfg)
         /* The previous lock owner died mid-session: park the chip through
            a best-effort wake+sleep so this session starts from a known
            state instead of riding an abandoned (possibly latched) one. */
+        DIAG_ENGINE("event=eownerdead_resync");
         (void)atcab_wakeup();
         (void)atcab_sleep();
         global_lock_recovered = 0;
@@ -208,8 +213,18 @@ ATCA_STATUS atcab_release_safe(void)
      * write is anomalously ACKed by the chip and cures it; on an
      * already-awake chip the extra wake is harmless.  TempKey loss from
      * Sleep is irrelevant here: the session is over. */
-    (void)atcab_wakeup();
-    (void)atcab_sleep();
+    {
+        ATCA_STATUS wake_status = atcab_wakeup();
+        ATCA_STATUS park_status = atcab_sleep();
+
+        /* A park that did not land cleanly is the genesis of the
+           "corrupted idle" latch - make it observable. */
+        if (ATCA_SUCCESS != wake_status || ATCA_SUCCESS != park_status)
+        {
+            DIAG_ENGINE("event=park_anomaly wake=0x%02x sleep=0x%02x",
+                        wake_status, park_status);
+        }
+    }
 
     status = atcab_release();
 
@@ -309,6 +324,11 @@ static int eccx08_destroy(ENGINE *e)
 static int eccx08_init(ENGINE *e)
 {
     DEBUG_ENGINE("Entered\n");
+
+    /* Marker for test harnesses: confirms the DIAG channel of this
+       process is enabled and reaches stderr, so an absence of later DIAG
+       events means "nothing happened" rather than "diagnostics off". */
+    DIAG_ENGINE("event=engine_ready");
 
     if (!global_lock.handle)
     {
