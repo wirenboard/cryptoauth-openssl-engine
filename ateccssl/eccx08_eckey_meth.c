@@ -545,6 +545,16 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
         /* Get public key without private key generation */
         status = atcab_get_pubkey(slot_num, &raw_pubkey[1]);
 
+        if (ATCA_HEALTH_TEST_ERROR == status)
+        {
+            /* Latched RNG health-test failure (0x08): cure it with a real
+               Sleep and retry once (GenKey depends on the RNG state and
+               keeps failing until the latch is cleared). */
+            (void)atcab_wakeup();
+            (void)atcab_sleep();
+            status = atcab_get_pubkey(slot_num, &raw_pubkey[1]);
+        }
+
         rel_status = atcab_release_safe();
 
         /* Check the atcab_get_pubkey result FIRST (before considering
