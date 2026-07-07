@@ -568,6 +568,7 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
         {
             DEBUG_ENGINE("Result 0x%x\n", status);
             DIAG_ENGINE("event=session_fail op=pubkey status=0x%02x", status);
+            eccx08_raise_session_error("load pubkey", status);
             break;
         }
 
