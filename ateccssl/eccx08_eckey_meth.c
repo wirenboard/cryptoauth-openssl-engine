@@ -550,9 +550,11 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
             /* Latched RNG health-test failure (0x08): cure it with a real
                Sleep and retry once (GenKey depends on the RNG state and
                keeps failing until the latch is cleared). */
+            DIAG_ENGINE("event=health_test_0x08 op=pubkey action=cure_retry");
             (void)atcab_wakeup();
             (void)atcab_sleep();
             status = atcab_get_pubkey(slot_num, &raw_pubkey[1]);
+            DIAG_ENGINE("event=health_test_retry op=pubkey status=0x%02x", status);
         }
 
         rel_status = atcab_release_safe();
@@ -565,6 +567,7 @@ static EVP_PKEY* eccx08_load_pubkey_internal(ENGINE *e, EVP_PKEY * pkey, const c
         if (ATCA_SUCCESS != status)
         {
             DEBUG_ENGINE("Result 0x%x\n", status);
+            DIAG_ENGINE("event=session_fail op=pubkey status=0x%02x", status);
             break;
         }
 

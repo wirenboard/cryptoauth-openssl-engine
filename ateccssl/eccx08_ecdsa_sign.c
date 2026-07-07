@@ -141,9 +141,11 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
                it. Cure the chip and retry the whole sign once -
                atcab_sign() redoes its Random/Nonce/Sign sequence, so no
                TempKey state is lost by the sleep. */
+            DIAG_ENGINE("event=health_test_0x08 op=sign action=cure_retry");
             (void)atcab_wakeup();
             (void)atcab_sleep();
             status = atcab_sign(slot_num, dgst, raw_sig);
+            DIAG_ENGINE("event=health_test_retry op=sign status=0x%02x", status);
         }
 
         /* Release the device, but remember its status separately. The
@@ -158,6 +160,7 @@ ECDSA_SIG* eccx08_ecdsa_do_sign_sig(const unsigned char *dgst, int dgst_len,
         if (ATCA_SUCCESS != status)
         {
             DEBUG_ENGINE("Sign Failure: %#x\n", status);
+            DIAG_ENGINE("event=session_fail op=sign status=0x%02x", status);
             break;
         }
 
