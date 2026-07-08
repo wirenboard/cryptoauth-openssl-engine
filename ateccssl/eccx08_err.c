@@ -14,6 +14,7 @@
 #include "eccx08_engine.h"
 
 #include <openssl/err.h>
+#include <pthread.h>
 #include <stdio.h>
 
 #define ECCX08_R_SESSION_FAILED 100
@@ -47,16 +48,20 @@ const char *eccx08_atca_status_name(int status)
     }
 }
 
+static pthread_once_t err_load_once = PTHREAD_ONCE_INIT;
+
+static void eccx08_err_do_load_strings(void)
+{
+    err_lib = ERR_get_next_error_library();
+    lib_name[0].error = ERR_PACK(err_lib, 0, 0);
+    reasons[0].error = ERR_PACK(err_lib, 0, ECCX08_R_SESSION_FAILED);
+    ERR_load_strings(err_lib, lib_name);
+    ERR_load_strings(err_lib, reasons);
+}
+
 void eccx08_err_load_strings(void)
 {
-    if (0 == err_lib)
-    {
-        err_lib = ERR_get_next_error_library();
-        lib_name[0].error = ERR_PACK(err_lib, 0, 0);
-        reasons[0].error = ERR_PACK(err_lib, 0, ECCX08_R_SESSION_FAILED);
-        ERR_load_strings(err_lib, lib_name);
-        ERR_load_strings(err_lib, reasons);
-    }
+    (void)pthread_once(&err_load_once, eccx08_err_do_load_strings);
 }
 
 void eccx08_raise_session_error(const char *op, int atca_status)
