@@ -1,10 +1,11 @@
-libateccssl (0.3.1) stable; urgency=medium
+libateccssl (0.4.0) stable; urgency=medium
 
   * ateccssl: park the chip with Sleep instead of Idle at session end;
     latched chip states (RNG health-test 0x08, corrupted idle) no
     longer survive between sessions
   * ateccssl: serialize all chip users with a robust shared-memory
-    mutex (frozen name, publish-after-init creation)
+    mutex (frozen name sourced from cryptoauthlib, publish-after-init
+    creation)
   * ateccssl: cure and retry once on a latched RNG health test instead
     of failing the session
   * ateccssl: fix segfault from a half-built ECDSA_SIG on release
@@ -18,7 +19,7 @@ libateccssl (0.3.1) stable; urgency=medium
   * NOTE: long-running processes that use the engine (nginx set up by
     wb-mqtt-alice) keep the old library mapped until restarted
 
- -- KraPete <86825564+KraPete@users.noreply.github.com>  Tue, 07 Jul 2026 15:13:20 +0000
+ -- KraPete <86825564+KraPete@users.noreply.github.com>  Wed, 08 Jul 2026 09:39:42 +0000
 
 libateccssl (0.3.0) stable; urgency=medium
 
