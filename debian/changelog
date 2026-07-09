@@ -1,3 +1,9 @@
+libateccssl (0.4.1) stable; urgency=medium
+
+  * cryptoauthlib: bump the bundled library to current master
+
+ -- Petr Krasnoshchekov <petr.krasnoshchekov@wirenboard.com>  Thu, 09 Jul 2026 07:03:56 +0000
+
 libateccssl (0.4.0) stable; urgency=medium
 
   * ateccssl: park the chip with Sleep instead of Idle at session end;
