@@ -1,3 +1,9 @@
+libateccssl (0.2.6-wb101) stable; urgency=medium
+
+  * Rebuild for bullseye
+
+ -- Nikolay Korotkiy <nikolay.korotkiy@wirenboard.com>  Mon, 20 Jul 2026 10:53:00 +0400
+
 libateccssl (0.2.6-wb100) stable; urgency=medium
 
   * ateccssl: park the chip with Sleep instead of Idle at session end;
